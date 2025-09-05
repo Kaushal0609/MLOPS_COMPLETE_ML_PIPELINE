@@ -1,3 +1,4 @@
+import http
 import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
@@ -5,7 +6,7 @@ import logging
 
 # Ensure the log directory exists 
 log_dirs = 'logs'
-os.makedirs('log_dirs', exist_ok=True)
+os.makedirs(log_dirs, exist_ok=True)
 
 # logging configration
 logger = logging.getLogger('data_ingestion')
@@ -42,7 +43,7 @@ def load_data(data_url: str) -> pd.DataFrame:
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """Preprocess the data"""
     try:
-        df.drop(columns=['Unnamed:2', 'Unnamed:3','Unnamed:4'], inplace=True)
+        df.drop(columns=['Unnamed: 2', 'Unnamed: 3','Unnamed: 4'], inplace=True)
         df.rename(columns = {'v1':'target', 'v2':'text'}, inplace=True)
         logger.debug("Data preprocessing completed")
         return df
@@ -65,4 +66,18 @@ def save_data(train_data: pd.DataFrame, test_data = pd.DataFrame, data_path = st
         raise
 
 def main():
-    test_size = 0.2
+    try:
+        test_size = 0.2
+        data_path = 'https://raw.githubusercontent.com/Kaushal0609/MLOPS_COMPLETE_ML_PIPELINE/refs/heads/main/experiments/spam.csv'
+        df = load_data(data_url=data_path)
+        final_df = preprocess_data(df)
+        train_data, test_data = train_test_split(final_df, test_size=test_size, random_state=2)
+        save_data(train_data, test_data, data_path='./data')
+    except Exception as e:
+        logger.error('Failed to complete the data ingestion process: %s', e)
+        print(f"Error : {e}")
+
+if __name__ == '__main__':
+    main()
+
+
